@@ -18,13 +18,17 @@ export const useTransactions = () => {
     }
 
     // Normaliza amount como string e date como number (timestamp)
-    const processed = (transactions as Transaction[]).map(t => ({
+    const processed = transactions.map(t => ({
       ...t,
+      // Add the missing required fields with default values
+      id: t.id || `tx-${Math.random().toString(36).substr(2, 9)}`,
+      type: t.transaction_type || t.type || '',
+      description: t.description || '',
       amount: t.amount.toString(),
       date: typeof t.date === 'number'
         ? String(t.date)
         : String(new Date(t.date).getTime())
-    }));
+    })) as Transaction[];
 
     // Calcula menor e maior timestamp para inicializar o filtro de data
     const timestamps = processed.map(t => t.date as unknown as number);

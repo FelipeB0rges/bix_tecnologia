@@ -22,18 +22,18 @@ export const useTransactions = () => {
       ...t,
       amount: t.amount.toString(),
       date: typeof t.date === 'number'
-        ? t.date
-        : new Date(t.date).getTime()
+        ? String(t.date)
+        : String(new Date(t.date).getTime())
     }));
 
     // Calcula menor e maior timestamp para inicializar o filtro de data
-    const timestamps = processed.map(t => t.date as number);
+    const timestamps = processed.map(t => t.date as unknown as number);
     const minDate = Math.min(...timestamps);
     const maxDate = Math.max(...timestamps);
 
     // Ajusta o dateRange do store para cobrir todo o dataset inicial
     useFiltersStore.setState({
-      dateRange: { startDate: minDate, endDate: maxDate }
+      dateRange: { startDate: minDate.toString(), endDate: maxDate.toString() }
     });
 
     setTransactionsData(processed);
@@ -46,7 +46,7 @@ export const useTransactions = () => {
         ? transaction.date
         : new Date(transaction.date).getTime();
 
-      const inRange = txDate >= dateRange.startDate && txDate <= dateRange.endDate;
+      const inRange = txDate >= Number(dateRange.startDate) && txDate <= Number(dateRange.endDate);
       const byAccount  = !account  || transaction.account  === account;
       const byIndustry = !industry || transaction.industry === industry;
       const byState    = !state    || transaction.state    === state;
@@ -73,9 +73,9 @@ export const useTransactions = () => {
   }, [filteredTransactions]);
 
   const uniqueOptions = useMemo(() => ({
-    accounts:   [...new Set(transactionsData.map(t => t.account))],
-    industries: [...new Set(transactionsData.map(t => t.industry))],
-    states:     [...new Set(transactionsData.map(t => t.state))],
+    accounts:   Array.from(new Set(transactionsData.map(t => t.account))),
+    industries: Array.from(new Set(transactionsData.map(t => t.industry))),
+    states:     Array.from(new Set(transactionsData.map(t => t.state))),
   }), [transactionsData]);
 
   const groupedByMonth = useMemo(() => {

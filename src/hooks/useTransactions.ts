@@ -18,26 +18,22 @@ export const useTransactions = () => {
     }
 
     // Normaliza amount como string e date como number (timestamp)
-    const processed = transactions.map(t => ({
+    const processed = (transactions as Transaction[]).map(t => ({
       ...t,
-      // Add the missing required fields with default values
-      id: t.id || `tx-${Math.random().toString(36).substr(2, 9)}`,
-      type: t.transaction_type || t.type || '',
-      description: t.description || '',
       amount: t.amount.toString(),
       date: typeof t.date === 'number'
-        ? String(t.date)
-        : String(new Date(t.date).getTime())
-    })) as Transaction[];
+        ? t.date
+        : new Date(t.date).getTime()
+    }));
 
     // Calcula menor e maior timestamp para inicializar o filtro de data
-    const timestamps = processed.map(t => Number(t.date));
+    const timestamps = processed.map(t => t.date as number);
     const minDate = Math.min(...timestamps);
     const maxDate = Math.max(...timestamps);
 
     // Ajusta o dateRange do store para cobrir todo o dataset inicial
     useFiltersStore.setState({
-      dateRange: { startDate: minDate.toString(), endDate: maxDate.toString() }
+      dateRange: { startDate: minDate, endDate: maxDate }
     });
 
     setTransactionsData(processed);
@@ -50,7 +46,7 @@ export const useTransactions = () => {
         ? transaction.date
         : new Date(transaction.date).getTime();
 
-      const inRange = txDate >= Number(dateRange.startDate) && txDate <= Number(dateRange.endDate);
+      const inRange = txDate >= dateRange.startDate && txDate <= dateRange.endDate;
       const byAccount  = !account  || transaction.account  === account;
       const byIndustry = !industry || transaction.industry === industry;
       const byState    = !state    || transaction.state    === state;
@@ -77,9 +73,9 @@ export const useTransactions = () => {
   }, [filteredTransactions]);
 
   const uniqueOptions = useMemo(() => ({
-    accounts:   Array.from(new Set(transactionsData.map(t => t.account))),
-    industries: Array.from(new Set(transactionsData.map(t => t.industry))),
-    states:     Array.from(new Set(transactionsData.map(t => t.state))),
+    accounts:   [...new Set(transactionsData.map(t => t.account))],
+    industries: [...new Set(transactionsData.map(t => t.industry))],
+    states:     [...new Set(transactionsData.map(t => t.state))],
   }), [transactionsData]);
 
   const groupedByMonth = useMemo(() => {

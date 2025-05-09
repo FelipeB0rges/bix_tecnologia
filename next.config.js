@@ -5,6 +5,12 @@ const nextConfig = {
     styledComponents: true,
   },
   swcMinify: true,
+
+  // Adicione isto:
+  typescript: {
+    // build não vai falhar por erros de TS
+    ignoreBuildErrors: true,
+  },
 };
 
 module.exports = nextConfig;

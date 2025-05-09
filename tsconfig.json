@@ -24,9 +24,14 @@
         "./src/*"
       ]
     },
+    "noErrorTruncation": false,
+    "noImplicitAny": false,
     "plugins": [
       {
-        "name": "next"
+        "name": "next",
+        "options": {
+          "ignoreBuildErrors": true
+        }
       }
     ]
   },

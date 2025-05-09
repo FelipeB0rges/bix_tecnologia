@@ -11,42 +11,46 @@ export const useTransactions = () => {
   const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
-    if (!Array.isArray(transactions) || transactions.length === 0) {
-      console.error("Falha ao carregar transações:", transactions);
-      setTransactionsData([]);
-      return;
-    }
+    const loadData = async () => {
+      // Adiciona um pequeno delay artificial para melhorar a experiência de loading
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      if (!Array.isArray(transactions) || transactions.length === 0) {
+        console.error("Falha ao carregar transações:", transactions);
+        setTransactionsData([]);
+        return;
+      }
 
-    // Normaliza amount como string e date como number (timestamp)
-    const processed = (transactions as Transaction[]).map(t => ({
-      ...t,
-      amount: t.amount.toString(),
-      date: typeof t.date === 'number'
-        ? t.date
-        : new Date(t.date).getTime()
-    }));
+      const processed = (transactions as Transaction[]).map(t => ({
+        ...t,
+        amount: t.amount.toString(),
+      }));
 
-    // Calcula menor e maior timestamp para inicializar o filtro de data
-    const timestamps = processed.map(t => t.date as number);
-    const minDate = Math.min(...timestamps);
-    const maxDate = Math.max(...timestamps);
+      const dates = processed.map(t => new Date(t.date).getTime());
+      const minDate = new Date(Math.min(...dates));
+      const maxDate = new Date(Math.max(...dates));
 
-    // Ajusta o dateRange do store para cobrir todo o dataset inicial
-    useFiltersStore.setState({
-      dateRange: { startDate: minDate, endDate: maxDate }
-    });
+      useFiltersStore.setState({
+        dateRange: { 
+          startDate: minDate.toISOString().split('T')[0],
+          endDate: maxDate.toISOString().split('T')[0]
+        }
+      });
 
-    setTransactionsData(processed);
-    setDataLoaded(true);
+      setTransactionsData(processed);
+      setDataLoaded(true);
+    };
+
+    loadData();
   }, []);
 
   const filteredTransactions = useMemo(() => {
     return transactionsData.filter(transaction => {
-      const txDate = typeof transaction.date === 'number'
-        ? transaction.date
-        : new Date(transaction.date).getTime();
+      const txDate = new Date(transaction.date).getTime();
+      const startTimestamp = new Date(dateRange.startDate).getTime();
+      const endTimestamp = new Date(dateRange.endDate).getTime() + (24 * 60 * 60 * 1000 - 1);
 
-      const inRange = txDate >= dateRange.startDate && txDate <= dateRange.endDate;
+      const inRange = txDate >= startTimestamp && txDate <= endTimestamp;
       const byAccount  = !account  || transaction.account  === account;
       const byIndustry = !industry || transaction.industry === industry;
       const byState    = !state    || transaction.state    === state;
@@ -73,9 +77,9 @@ export const useTransactions = () => {
   }, [filteredTransactions]);
 
   const uniqueOptions = useMemo(() => ({
-    accounts:   [...new Set(transactionsData.map(t => t.account))],
-    industries: [...new Set(transactionsData.map(t => t.industry))],
-    states:     [...new Set(transactionsData.map(t => t.state))],
+    accounts:   Array.from(new Set(transactionsData.map(t => t.account))),
+    industries: Array.from(new Set(transactionsData.map(t => t.industry))),
+    states:     Array.from(new Set(transactionsData.map(t => t.state))),
   }), [transactionsData]);
 
   const groupedByMonth = useMemo(() => {
@@ -87,12 +91,12 @@ export const useTransactions = () => {
       const val = parseFloat(amount);
       if (isNaN(val) || val === 0) return;
 
-      const dt = new Date(typeof date === 'number' ? date : new Date(date).getTime());
+      const dt = new Date(date);
       const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
 
       months[key] = months[key] || { income: 0, expenses: 0 };
       if (val > 0) months[key].income += val;
-      else           months[key].expenses += Math.abs(val);
+      else         months[key].expenses += Math.abs(val);
     });
 
     return Object.entries(months)
@@ -104,8 +108,8 @@ export const useTransactions = () => {
     if (!dataLoaded) return [];
 
     const sorted = [...filteredTransactions].sort((a, b) => {
-      const da = typeof a.date === 'number' ? a.date : new Date(a.date).getTime();
-      const db = typeof b.date === 'number' ? b.date : new Date(b.date).getTime();
+      const da = new Date(a.date).getTime();
+      const db = new Date(b.date).getTime();
       return da - db;
     });
 
@@ -113,13 +117,13 @@ export const useTransactions = () => {
     return sorted.map(({ date, amount }) => {
       const val = parseFloat(amount);
       running += val;
-      const dt = new Date(typeof date === 'number' ? date : new Date(date).getTime());
-      return { date: dt.toISOString().split('T')[0], balance: running };
+      const formattedDate = new Date(date).toISOString().split('T')[0];
+      return { date: formattedDate, balance: running };
     });
   }, [filteredTransactions, dataLoaded]);
 
   return {
-    transactions:   filteredTransactions,
+    transactions: filteredTransactions,
     summaryData,
     uniqueOptions,
     groupedByMonth,

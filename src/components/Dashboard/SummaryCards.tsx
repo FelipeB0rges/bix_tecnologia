@@ -1,3 +1,4 @@
+import { Skeleton } from '@mui/material';
 import styled from 'styled-components';
 import { useTransactions } from '@/hooks/useTransactions';
 
@@ -15,6 +16,7 @@ const Card = styled.div<{ variant: string }>`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
+  min-height: 120px;
   
   &::before {
     content: '';
@@ -48,7 +50,7 @@ const CardValue = styled.div`
 `;
 
 export const SummaryCards: React.FC = () => {
-  const { summaryData } = useTransactions();
+  const { summaryData, isLoading } = useTransactions();
   
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -57,34 +59,39 @@ export const SummaryCards: React.FC = () => {
     }).format(value);
   };
 
+  if (isLoading) {
+    return (
+      <CardsContainer>
+        {[...Array(4)].map((_, index) => (
+          <Card key={index} variant="balance">
+            <Skeleton variant="text" width="60%" height={24} />
+            <Skeleton variant="text" width="80%" height={40} />
+          </Card>
+        ))}
+      </CardsContainer>
+    );
+  }
+
   return (
     <CardsContainer>
       <Card variant="balance">
         <CardTitle>Total Balance</CardTitle>
-        <CardValue>
-          {formatCurrency(summaryData.balance)}
-        </CardValue>
+        <CardValue>{formatCurrency(summaryData.balance)}</CardValue>
       </Card>
       
       <Card variant="income">
         <CardTitle>Total Income</CardTitle>
-        <CardValue>
-          {formatCurrency(summaryData.income)}
-        </CardValue>
+        <CardValue>{formatCurrency(summaryData.income)}</CardValue>
       </Card>
       
       <Card variant="expense">
         <CardTitle>Total Expenses</CardTitle>
-        <CardValue>
-          {formatCurrency(summaryData.expenses)}
-        </CardValue>
+        <CardValue>{formatCurrency(summaryData.expenses)}</CardValue>
       </Card>
       
       <Card variant="pending">
         <CardTitle>Pending Transactions</CardTitle>
-        <CardValue>
-          {summaryData.pendingCount}
-        </CardValue>
+        <CardValue>{summaryData.pendingCount}</CardValue>
       </Card>
     </CardsContainer>
   );

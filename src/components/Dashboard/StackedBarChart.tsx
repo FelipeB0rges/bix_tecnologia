@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useTransactions } from '@/hooks/useTransactions';
 import { Chart, registerables } from 'chart.js';
 import { format, parse } from 'date-fns';
+import { Skeleton } from '@mui/material';
 
 Chart.register(...registerables);
 
@@ -12,6 +13,7 @@ const ChartContainer = styled.div`
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
+  min-height: 400px;
 `;
 
 const ChartTitle = styled.h3`
@@ -21,16 +23,15 @@ const ChartTitle = styled.h3`
 `;
 
 export const StackedBarChart: React.FC = () => {
-  const { groupedByMonth } = useTransactions();
+  const { groupedByMonth, isLoading } = useTransactions();
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
   useEffect(() => {
-    if (chartRef.current) {
+    if (chartRef.current && !isLoading) {
       const ctx = chartRef.current.getContext('2d');
       
       if (ctx) {
-        // Destroy existing chart if it exists
         if (chartInstance.current) {
           chartInstance.current.destroy();
         }
@@ -63,6 +64,7 @@ export const StackedBarChart: React.FC = () => {
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
               x: {
                 stacked: true,
@@ -82,12 +84,23 @@ export const StackedBarChart: React.FC = () => {
         chartInstance.current.destroy();
       }
     };
-  }, [groupedByMonth]);
+  }, [groupedByMonth, isLoading]);
+
+  if (isLoading) {
+    return (
+      <ChartContainer>
+        <Skeleton variant="text" width="40%" height={32} style={{ marginBottom: '1rem' }} />
+        <Skeleton variant="rectangular" height={350} />
+      </ChartContainer>
+    );
+  }
 
   return (
     <ChartContainer>
       <ChartTitle>Income vs Expenses by Month</ChartTitle>
-      <canvas ref={chartRef} />
+      <div style={{ height: '350px' }}>
+        <canvas ref={chartRef} />
+      </div>
     </ChartContainer>
   );
 };

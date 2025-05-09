@@ -31,7 +31,7 @@ export const useTransactions = () => {
     })) as Transaction[];
 
     // Calcula menor e maior timestamp para inicializar o filtro de data
-    const timestamps = processed.map(t => t.date as unknown as number);
+    const timestamps = processed.map(t => Number(t.date));
     const minDate = Math.min(...timestamps);
     const maxDate = Math.max(...timestamps);
 

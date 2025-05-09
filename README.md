@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Financial Dashboard
 
-## Getting Started
+A dashboard for financial data visualization built with Next.js and TypeScript.
 
-First, run the development server:
+## Features
+
+- User authentication with session persistence
+- Protected dashboard routes
+- Financial data visualization with Charts
+- Dynamic filtering with persistence
+- Responsive design for desktop and mobile
+
+## Tech Stack
+
+- Next.js
+- TypeScript
+- Styled Components
+- Chart.js
+- Zustand for state management
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/financial-dashboard.git
+cd financial-dashboard
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Ensure the `transactions.json` file is placed in the `src/data` directory.
+
+## Running Locally
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Building for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+# or
+yarn build
+```
 
-## Learn More
+Then start the production server:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run start
+# or
+yarn start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Local Storage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This application uses localStorage for:
+- User authentication session
+- Filter preferences
 
-## Deploy on Vercel
+If you experience any issues, try clearing your browser's local storage.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The easiest way to deploy this application is using Vercel:
+
+1. Push your code to a GitHub repository
+2. Import the project in Vercel
+3. Vercel will automatically detect Next.js and configure the build settings
+
+## License
+
+MIT
